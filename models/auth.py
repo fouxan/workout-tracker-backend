@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, ForeignKey, JSON, Float, Boolean
-import datetime
+from datetime import datetime
 import secrets
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime

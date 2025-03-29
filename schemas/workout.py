@@ -54,3 +54,39 @@ class WorkoutTemplateResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class SetStart(BaseModel):
+    weight: float
+    reps: int
+    is_warmup: bool = False
+
+
+class SetComplete(BaseModel):
+    rpe: Optional[float] = Field(None, ge=6, le=10)
+    notes: Optional[str] = None
+
+
+class ExerciseStart(BaseModel):
+    activity_id: int
+
+
+class WorkoutStart(BaseModel):
+    template_id: Optional[int] = None
+
+
+class WorkoutResponse(BaseModel):
+    id: int
+    status: str
+    start_time: datetime
+    duration: Optional[float]
+    exercises: List[dict]
+
+    class Config:
+        orm_mode = True
+
+
+class RealTimeUpdate(BaseModel):
+    type: str  # 'set_start', 'set_complete', 'exercise_start', 'pause'
+    data: dict
+    timestamp: datetime = Field(default_factory=datetime.utcnow)

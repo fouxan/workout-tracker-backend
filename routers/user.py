@@ -22,7 +22,7 @@ from services.auth import (
 )
 from controllers.auth import get_user_by_email, create_user
 from services.db import get_db
-import datetime
+from datetime import datetime
 from sqlalchemy import select
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
