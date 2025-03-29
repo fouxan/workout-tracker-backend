@@ -1,9 +1,12 @@
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from models.otp import PasswordResetOTP
+from models.auth import PasswordResetOTP
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends, HTTPException, status
+from services.db import get_db
+from controllers.auth import get_user_by_email
 import os
 
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
@@ -67,3 +70,34 @@ async def create_reset_otp(db: AsyncSession, user_id: int, expiry_minutes: int =
     db.add(otp_record)
     await db.commit()
     return raw_otp
+
+
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError
+from services.auth import decode_token
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = decode_token(token)
+        if payload is None or payload.get("type") != "access":
+            raise credentials_exception
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError as e:
+        raise credentials_exception from e
+
+    user = await get_user_by_email(db, email=email)
+    if user is None:
+        raise credentials_exception
+    return user
