@@ -13,6 +13,6 @@ app.include_router(workout.router)
 app.include_router(workout_plan.router)
 
 
-@app.get("/")
+@app.get("/healthcheck")
 async def root():
-    return {"message": "Hello World!"}
+    return {"message": "Ok!"}
