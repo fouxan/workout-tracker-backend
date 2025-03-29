@@ -1,24 +1,26 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Dict, Optional
+
 
 class Activity(BaseModel):
-  id: str
-  name: Optional[str]
-  target_muscle_group: Optional[str]
-  activity_type: Optional[str]
-  mechanics: Optional[str]
-  force_type: Optional[str]
-  experience_level: Optional[str]
-  secondary_muscles: Optional[str]
-  equipment: Optional[str]
-  overview: Optional[str]
-  instructions: Optional[str]
-  tips: Optional[str]
-  image_url: Optional[str]
-  video_url: Optional[str]
-  muscle_group_image_url: Optional[str]
-  calories_125lbs: Optional[int]
-  calories_155lbs: Optional[int]
-  calories_185lbs: Optional[int]
-  data_links: List[str]
+    name: str
+    force: str
+    level: str
+    mechanic: str
+    equipment: str
+    primary_muscles: List[str]
+    secondary_muscles: List[str]
+    instructions: List[str]
+    category: str
+    images: List[str]
 
+
+class ActivityCreate(Activity):
+    pass
+
+
+class ActivityResponse(Activity):
+    id: int
+
+    class Config:
+        orm_mode = True
