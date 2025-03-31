@@ -7,7 +7,7 @@ from typing import List, Optional
 class ScheduledWorkoutCreate(BaseModel):
     template_id: int
     scheduled_time: Optional[str] = Field(
-        None, regex="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+        None, pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
     )
     is_completed: Optional[bool] = False
 

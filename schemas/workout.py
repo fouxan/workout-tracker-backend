@@ -6,7 +6,7 @@ from typing import List, Optional
 
 class SetCreate(BaseModel):
     set_number: int
-    set_type: str = Field(..., regex="^(normal|drop|super)$")
+    set_type: str = Field(..., pattern="^(normal|drop|super)$")
     parameters: dict
 
 
