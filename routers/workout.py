@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models.workout import PerformedExercise, PerformedWorkout
 from schemas.workout import *
 from controllers.workout import *
-from services.db import get_db, get_current_user
+from services.db import get_db
 from services.auth import get_current_user
 from models.auth import User
 from fastapi import WebSocket, WebSocketDisconnect
