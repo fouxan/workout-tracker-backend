@@ -5,7 +5,7 @@ Base = declarative_base()
 
 
 class Activity(Base):
-    __tablename__ = "Activities"
+    __tablename__ = "activities"
 
     id = Column(BigInteger, primary_key=True, index=True)
     name = Column(String, nullable=False)

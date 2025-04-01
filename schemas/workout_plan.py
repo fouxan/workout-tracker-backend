@@ -38,7 +38,7 @@ class ScheduledWorkoutResponse(ScheduledWorkoutCreate):
     template_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class PlanDayResponse(PlanDayCreate):
@@ -56,4 +56,4 @@ class WorkoutPlanResponse(BaseModel):
     days: List[PlanDayResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

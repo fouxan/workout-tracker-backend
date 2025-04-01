@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc, desc
 from typing import Optional
-from schemas.activity import Activity
+from models.activity import Activity
 
 
 async def get_activities(
@@ -15,10 +15,7 @@ async def get_activities(
     query = select(Activity)
 
     if keyword:
-        query = query.where(
-            Activity.name.ilike(f"%{keyword}%")
-            | Activity.instructions.ilike(f"%{keyword}%")
-        )
+        query = query.where(Activity.name.ilike(f"%{keyword}%"))
 
     # Apply filters
     if filters:
@@ -39,6 +36,6 @@ async def get_activities(
     return result.scalars().all()
 
 
-async def get_activity(db: AsyncSession, activity_id: int):
+async def get_activity(db: AsyncSession, activity_id: str):
     result = await db.execute(select(Activity).where(Activity.id == activity_id))
     return result.scalar_one_or_none()

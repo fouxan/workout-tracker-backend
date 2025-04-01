@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List
 from controllers.activity import get_activities, get_activity
-from schemas.activity import Activity, ActivityResponse
+from schemas.activity import ActivityResponse
+from models.activity import Activity
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.db import get_db
@@ -9,7 +10,7 @@ from services.db import get_db
 router = APIRouter(prefix="/activities", tags=["activities"])
 
 
-@router.get("/", response_model=List[Activity])
+@router.get("/", response_model=List[ActivityResponse])
 async def get_activities_endpoint(
     page: int = Query(1, ge=1, description="Page number (starting from 1)"),
     keyword: Optional[str] = Query(
@@ -25,8 +26,8 @@ async def get_activities_endpoint(
     ),
     db: AsyncSession = Depends(get_db),
 ):
+    filters = {}
     if filter:
-        filters = {}
         try:
             key, value = filter.split(":")
             if hasattr(Activity, key):
@@ -41,18 +42,18 @@ async def get_activities_endpoint(
     if sort and sort.lstrip("-") not in valid_sort_columns:
         sort = None
 
-    try:
-        return await get_activities(
-            db, page=page, limit=limit, keyword=keyword, sort=sort, filters=filters
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error retrieving activities: {str(e)}"
-        ) from e
+    # try:
+    return await get_activities(
+        db, page=page, limit=limit, keyword=keyword, sort=sort, filters=filters
+    )
+    # except Exception as e:
+    #     raise HTTPException(
+    #         status_code=500, detail=f"Error retrieving activities: {str(e)}"
+    #     ) from e
 
 
-@router.get("/{activity_id}", response_model=Activity)
-async def get_activity_endpoint(activity_id: int, db: AsyncSession = Depends(get_db)):
+@router.get("/{activity_id}", response_model=ActivityResponse)
+async def get_activity_endpoint(activity_id: str, db: AsyncSession = Depends(get_db)):
     activity = await get_activity(db, activity_id)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")

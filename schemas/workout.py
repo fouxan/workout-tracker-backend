@@ -30,7 +30,7 @@ class SetResponse(BaseModel):
     parameters: dict
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ExerciseResponse(BaseModel):
@@ -41,7 +41,7 @@ class ExerciseResponse(BaseModel):
     sets: List[SetResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class WorkoutTemplateResponse(BaseModel):
@@ -53,7 +53,7 @@ class WorkoutTemplateResponse(BaseModel):
     exercises: List[ExerciseResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class SetStart(BaseModel):
@@ -83,7 +83,7 @@ class WorkoutResponse(BaseModel):
     exercises: List[dict]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class RealTimeUpdate(BaseModel):

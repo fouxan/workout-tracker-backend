@@ -40,7 +40,10 @@ async def register_user(
         )
 
     # Create user
+    print("Creating user with email:", signup_request.email)
     user = await create_user(db, signup_request)
+
+    print("User created:", user)
 
     # Generate tokens
     access_token = create_access_token({"sub": user.email})

@@ -20,7 +20,7 @@ class ActivityCreate(Activity):
 
 
 class ActivityResponse(Activity):
-    id: int
+    id: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

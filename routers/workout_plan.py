@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.workout_plan import *
 from controllers.workout_plan import *
 from services.db import get_db
-from services.auth import get_current_user
+from middleware.auth import get_current_user
 from models.auth import User
 
 
