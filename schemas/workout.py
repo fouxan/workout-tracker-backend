@@ -7,21 +7,26 @@ from typing import List, Optional
 class SetCreate(BaseModel):
     set_number: int
     set_type: str = Field(..., pattern="^(normal|drop|super)$")
-    parameters: dict
+    weight: Optional[float]
+    reps: Optional[int]
+    is_warmup: bool = False
+    rpe: Optional[float] = Field(None, ge=6, le=10)
+    notes: Optional[str] = None
+    rest_after_set: Optional[str]  # ISO 8601 duration format
 
 
 class ExerciseCreate(BaseModel):
-    activity_id: int
+    activity_id: str
     order: int
     rest_between_sets: Optional[str]  # ISO 8601 duration format
     notes: Optional[str]
-    sets: List[SetCreate]
+    sets: Optional[List[SetCreate]] = []
 
 
 class WorkoutTemplateCreate(BaseModel):
     name: str = Field(..., max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    exercises: List[ExerciseCreate]
+    exercises: Optional[List[ExerciseCreate]] = []
 
 
 class SetResponse(BaseModel):
@@ -34,7 +39,7 @@ class SetResponse(BaseModel):
 
 
 class ExerciseResponse(BaseModel):
-    activity_id: int
+    activity_id: str
     order: int
     rest_between_sets: Optional[str]
     notes: Optional[str]
@@ -68,7 +73,7 @@ class SetComplete(BaseModel):
 
 
 class ExerciseStart(BaseModel):
-    activity_id: int
+    activity_id: str
 
 
 class WorkoutStart(BaseModel):

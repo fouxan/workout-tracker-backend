@@ -1,23 +1,98 @@
 # models/workout.py
 from sqlalchemy import (
+    UUID,
     Column,
     BigInteger,
     String,
-    JSON,
     DateTime,
-    Interval,
     ForeignKey,
     Float,
     Integer,
     Boolean,
 )
-from datetime import timedelta
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from services.db import Base
 
 
-class WorkoutTemplate(Base):
+class ActivitySets(Base):
+    __tablename__ = "activity_sets"
+
+    id = Column(UUID, primary_key=True, index=True)
+    template_activity_id = Column(
+        UUID, ForeignKey("workout_template_activities.id"), nullable=True
+    )
+    session_activity_id = Column(
+        UUID, ForeignKey("workout_session_activities.id"), nullable=True
+    )
+    reps = Column(Integer, nullable=True)
+    weight = Column(Float, nullable=True)
+    duration = Column(Float, nullable=True)
+    rpe = Column(Float, nullable=True)
+    pace = Column(Float, nullable=True)
+    heart_rate = Column(Float, nullable=True)
+    is_active = Column(Boolean, default=False)
+    notes = Column(String, nullable=True)
+    rest_after_set = Column(Float, nullable=True)
+    set_number = Column(Integer, nullable=False)
+    is_warmup = Column(Boolean, default=False)
+    is_cooldown = Column(Boolean, default=False)
+    set_type = Column(String, nullable=True)
+    started_at = Column(DateTime, nullable=True)
+    ended_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, onupdate=datetime.now)
+    # Relationships
+    template_activity = relationship("WorkoutTemplateActivity", back_populates="sets")
+    session_activity = relationship("WorkoutSessionActivity", back_populates="sets")
+    __table_args__ = (
+        {
+            "sqlite_autoincrement": True,
+            "extend_existing": True,
+        },
+    )
+
+
+class WorkoutSessionActivities(Base):
+    __tablename__ = "workout_session_activities"
+    id = Column(UUID, primary_key=True, index=True)
+    activity_id = Column(String, nullable=False)
+    session_id = Column(UUID, ForeignKey("workout_sessions.id"), nullable=False)
+    notes = Column(String, nullable=True)
+    is_active = Column(Boolean, default=False)
+    started_at = Column(DateTime, nullable=True)
+    ended_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    session = relationship("WorkoutSession", back_populates="activities")
+    sets = relationship(
+        "ActivitySet", back_populates="session_activity", cascade="all, delete-orphan"
+    )
+    __table_args__ = (
+        {
+            "sqlite_autoincrement": True,
+            "extend_existing": True,
+        },
+    )
+
+
+class WorkoutTemplateActivities(Base):
+    __tablename__ = "workout_template_activities"
+
+    id = Column(UUID, primary_key=True, index=True)
+    activity_id = Column(String, nullable=False)
+    template_id = Column(UUID, ForeignKey("workout_templates.id"), nullable=False)
+    order = Column(Integer, nullable=False)
+    notes = Column(String, nullable=True)
+
+    # Relationships
+    template = relationship("WorkoutTemplate", back_populates="exercises")
+    sets = relationship(
+        "ActivitySet", back_populates="template_activity", cascade="all, delete-orphan"
+    )
+
+
+class WorkoutTemplates(Base):
     __tablename__ = "workout_templates"
 
     id = Column(BigInteger, primary_key=True, index=True)
@@ -32,85 +107,49 @@ class WorkoutTemplate(Base):
     )
 
 
-class WorkoutExercise(Base):
-    __tablename__ = "workout_exercises"
+class WorkoutSessions(Base):
+    __tablename__ = "workout_sessions"
 
-    id = Column(BigInteger, primary_key=True, index=True)
-    template_id = Column(BigInteger, ForeignKey("workout_templates.id"), nullable=False)
-    activity_id = Column(BigInteger, ForeignKey("Activities.id"), nullable=False)
-    order = Column(BigInteger, nullable=False)
-    rest_between_sets = Column(Interval)
+    id = Column(UUID, primary_key=True, index=True)
+    template_id = Column(UUID, ForeignKey("workout_templates.id"), nullable=True)
+    name = Column(String(100), nullable=False)
+    description = Column(String(500))
+    user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
+    status = Column(
+        String,
+        nullable=False,
+        default="draft",
+        server_default="draft",
+    )
     notes = Column(String(500))
+    started_at = Column(DateTime)
+    ended_at = Column(DateTime)
+    calories_burnt = Column(Float, nullable=True)
 
-    template = relationship("WorkoutTemplate", back_populates="exercises")
-    activity = relationship("Activity")  # From previous activity model
-    sets = relationship(
-        "ExerciseSet", back_populates="exercise", cascade="all, delete-orphan"
+    # Relationships
+    user = relationship("User", back_populates="workout_sessions")
+    template = relationship("WorkoutTemplate", back_populates="sessions")
+    activities = relationship(
+        "WorkoutSessionActivity", back_populates="session", cascade="all, delete-orphan"
+    )
+    __table_args__ = (
+        {
+            "sqlite_autoincrement": True,
+            "extend_existing": True,
+        },
     )
 
 
-class ExerciseSet(Base):
-    __tablename__ = "exercise_sets"
-
-    id = Column(BigInteger, primary_key=True, index=True)
-    exercise_id = Column(BigInteger, ForeignKey("workout_exercises.id"), nullable=False)
-    set_number = Column(BigInteger, nullable=False)
-    set_type = Column(String(20), nullable=False)  # normal, drop, super
-    parameters = Column(
-        JSON, nullable=False
-    )  # {weight: [], reps: [], rpe: null, tempo: "3010"}
-
-    exercise = relationship("WorkoutExercise", back_populates="sets")
-
-
-class PerformedWorkout(Base):
-    __tablename__ = "performed_workouts"
+class WorkoutPlans(Base):
+    __tablename__ = "workout_plans"
 
     id = Column(BigInteger, primary_key=True, index=True)
     user_id = Column(BigInteger, ForeignKey("user.id"), nullable=False)
-    template_id = Column(BigInteger, ForeignKey("workout_templates.id"))
-    start_time = Column(DateTime, default=datetime.now)
-    end_time = Column(DateTime)
-    paused_duration = Column(Interval, default=timedelta(0))
-    status = Column(String(20), default="active")
-    performance_metrics = Column(JSON)
+    name = Column(String(100), nullable=False)
+    description = Column(String(500))
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, onupdate=datetime.now)
 
-    exercises = relationship(
-        "PerformedExercise", back_populates="workout", cascade="all, delete-orphan"
+    templates = relationship(
+        "WorkoutTemplate", back_populates="workout_plan", cascade="all, delete-orphan"
     )
-
-
-class PerformedExercise(Base):
-    __tablename__ = "performed_exercises"
-
-    id = Column(BigInteger, primary_key=True, index=True)
-    workout_id = Column(BigInteger, ForeignKey("performed_workouts.id"), nullable=False)
-    activity_id = Column(BigInteger, ForeignKey("Activities.id"), nullable=False)
-    order = Column(Integer)
-    start_time = Column(DateTime)
-    end_time = Column(DateTime)
-    rest_periods = Column(JSON)  # {between_sets: [timedelta]}
-
-    workout = relationship("PerformedWorkout", back_populates="exercises")
-    sets = relationship(
-        "PerformedSet", back_populates="exercise", cascade="all, delete-orphan"
-    )
-
-
-class PerformedSet(Base):
-    __tablename__ = "performed_sets"
-
-    id = Column(BigInteger, primary_key=True, index=True)
-    exercise_id = Column(
-        BigInteger, ForeignKey("performed_exercises.id"), nullable=False
-    )
-    set_number = Column(Integer)
-    weight = Column(Float)
-    reps = Column(Integer)
-    rpe = Column(Float)
-    start_time = Column(DateTime)
-    end_time = Column(DateTime)
-    is_warmup = Column(Boolean, default=False)
-    notes = Column(String(500))
-
-    exercise = relationship("PerformedExercise", back_populates="sets")

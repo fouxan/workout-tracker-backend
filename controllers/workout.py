@@ -37,7 +37,6 @@ async def create_workout_template(
             template_id=db_template.id,
             activity_id=exercise.activity_id,
             order=exercise.order,
-            rest_between_sets=isodate.parse_duration(exercise.rest_between_sets),
             notes=exercise.notes,
         )
         db.add(db_exercise)
@@ -49,7 +48,12 @@ async def create_workout_template(
                 exercise_id=db_exercise.id,
                 set_number=set_data.set_number,
                 set_type=set_data.set_type,
-                parameters=set_data.parameters,
+                duration=isodate.parse_duration(set_data.duration),
+                weight=set_data.weight,
+                reps=set_data.reps,
+                is_warmup=set_data.is_warmup,
+                rest_after_set=isodate.parse_duration(set_data.rest_after_set),
+                is_cooldown=set_data.is_cooldown,
             )
             db.add(db_set)
 
